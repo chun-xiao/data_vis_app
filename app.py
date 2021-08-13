@@ -6,7 +6,7 @@ Created on Fri Aug 13 21:48:35 2021
 import streamlit as st
 
 import pandas as pd
-import numpy as np
+
 
 
 st.title("Chun's Data Visualization app")
