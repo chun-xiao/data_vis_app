@@ -17,3 +17,4 @@ upload_file = st.file_uploader('', type="csv", accept_multiple_files=False)
 if upload_file:
     file_df = pd.read_csv(upload_file)
     st.write(file_df.head())
+    st.write("Success")
