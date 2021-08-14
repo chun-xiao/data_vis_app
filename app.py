@@ -74,7 +74,7 @@ def plot_1year_prediction(plot_df, list_of_food, increase_rate, training_years, 
         this_ax.set_title(food_type)
     return fig
 
-st.title(":chart_with_upwards_trend: Food Production prediction")
+st.title(":chart_with_upwards_trend: Food Production Prediction")
 
 from_year_to_predict = 2021
 
@@ -94,12 +94,12 @@ if upload_file:
     st.write("---")
 
 
-    st.title(":chart_with_upwards_trend: Burger, Donut, Pancake")
+    st.title(":cookie: Burger, Donut, Pancake")
     
     st.sidebar.title(":pencil: Settings")
-    increase_rate_input = st.sidebar.number_input("Assume: FTE yearly increase rate (%) in next 5 years:", -10, 10, 0, 1)
+    increase_rate_input = st.sidebar.number_input("Assume: number of staff yearly increase rate (%) in next 5 years:", -10, 10, 0, 1)
     increase_rate_input = increase_rate_input*0.01
-    consider_VSP_honorary = st.sidebar.checkbox("Consider 2020 VSP retains with 20% decay", 1)
+    consider_VSP_honorary = st.sidebar.checkbox("Consider 2020 retains with 20% decay", 1)
     
     
     features_selected = st.sidebar.selectbox("Factors related to staff number", ["total FTE", "total & re FTE", "three FTE"], 0)
@@ -109,7 +109,7 @@ if upload_file:
     plot_radio = st.sidebar.radio("Display total counts or counts per FTE: ", ["total count", "count per person"])
     
     st.sidebar.write("---")
-    st.sidebar.write("@2021 Chun")
+    st.sidebar.write("@2021 Aug by Chun")
     
     
     ##  --- prepare data
@@ -186,7 +186,7 @@ if upload_file:
     ### plot all deps ---------------
     plot_df = all_deps.T
     
-    st.subheader("Factors selected: {}, assume yearly FTE increase: {}, trained by historical {} years".format(features_selected, increase_rate_input, years_for_training))
+    st.subheader("Factors selected: {}, assume yearly staff number increase: {}, trained by historical {} years".format(features_selected, increase_rate_input, years_for_training))
     fig = plot_1year_prediction(plot_df, food_list, increase_rate_input, years_for_training, plot_radio)
     st.pyplot(fig)
     
@@ -200,7 +200,7 @@ if upload_file:
     link_pred= f'<a href="data:file/csv;base64,{b64_pred}" download="{save_filename}">Save the full table</a>'
     download_clo2.markdown(link_pred, unsafe_allow_html=True)
     
-    count_cols = [x for x in plot_df.columns if (('change' not in x) and ('_pub_counts' in x))]
+    count_cols = [x for x in plot_df.columns if (('change' not in x) and (x.endswith('_count')))]
     temp = plot_df[count_cols].T.copy()
     temp = temp.round()
     csv_pred_count = temp.to_csv(index=True)
@@ -221,7 +221,7 @@ if upload_file:
     
     st.write("---")
     
-    st.subheader("Food department data")
+    st.subheader("Food sector data")
     cols_after_2014 = [x for x in all_deps.columns if x>2014 ]
     for i in range(len(food_list)):
         st.table(all_deps[cols_after_2014].iloc[i*7: (i+1)*7])
