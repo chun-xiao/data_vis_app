@@ -42,7 +42,16 @@ def plot_1year_prediction(plot_df, list_of_food, increase_rate, training_years, 
         if show_y == "total count":
             this_ax.set_ylabel("# total count")
             if annotate:
-                this_ax.annotate('year: 2021\ntotal count: {:.0f}\nchange rate: {}%'.format(pred_2021, count_change_rate_prior_year),
+                if food_type == "BURGER":
+                    this_ax.annotate('year: 2021\navg count: {: .2f}\nchange rate: {}%'.format(pred_2021, count_change_rate_prior_year),
+                             xy = (2021, pred_2021) , textcoords='offset points', 
+                             xytext=(-40,40), # distance from text to points (x,y)
+                             ha='center',
+                             bbox=dict(boxstyle="round", alpha=0.1),
+                             arrowprops=dict(arrowstyle= "fancy",fc="0.6", ec="none",
+                              connectionstyle="angle3,angleA=0,angleB=-90"))
+                else:
+                    this_ax.annotate('year: 2021\ntotal count: {:.0f}\nchange rate: {}%'.format(pred_2021, count_change_rate_prior_year),
                          xy = (2021, pred_2021) , textcoords='offset points', 
                          xytext=(-40,-60), # distance from text to points (x,y)
                          ha='center',
