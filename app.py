@@ -1,6 +1,6 @@
 """
 Created on Fri Aug 13 21:48:35 2021
-
+https://chun-vis-app.herokuapp.com/
 @author: Chun
 """
 import streamlit as st
@@ -11,14 +11,14 @@ import base64
 import warnings
 warnings.filterwarnings("ignore")
 
-st.set_page_config(page_title="Donut/Burger/Pancake Prediction App",layout='wide')
+st.set_page_config(page_title="Donut/Pancake Prediction App",layout='wide')
 
 
 def plot_1year_prediction(plot_df, list_of_food, increase_rate, training_years, show_y):
     how_many_years_to_predict = 2
     annotate = 1
-    fig, axes  = plt.subplots(1, 3, figsize= (20, 5), sharex = True, sharey = False)
-    for i in range(3):
+    fig, axes  = plt.subplots(1, 2, figsize= (15, 5), sharex = True, sharey = False)
+    for i in range(2):
         food_type = list_of_food[i]
 
         if show_y == "total count":
@@ -42,22 +42,22 @@ def plot_1year_prediction(plot_df, list_of_food, increase_rate, training_years, 
         if show_y == "total count":
             this_ax.set_ylabel("# total count")
             if annotate:
-                if food_type == "BURGER":
-                    this_ax.annotate('year: 2021\ntotal count: {: .2f}\nchange rate: {}%'.format(pred_2021, count_change_rate_prior_year),
-                             xy = (2021, pred_2021) , textcoords='offset points', 
-                             xytext=(-40,40), # distance from text to points (x,y)
-                             ha='center',
-                             bbox=dict(boxstyle="round", alpha=0.1),
-                             arrowprops=dict(arrowstyle= "fancy",fc="0.6", ec="none",
-                              connectionstyle="angle3,angleA=0,angleB=-90"))
-                else:
-                    this_ax.annotate('year: 2021\ntotal count: {:.0f}\nchange rate: {}%'.format(pred_2021, count_change_rate_prior_year),
-                         xy = (2021, pred_2021) , textcoords='offset points', 
-                         xytext=(-40,-60), # distance from text to points (x,y)
-                         ha='center',
-                         bbox=dict(boxstyle="round", alpha=0.1),
-                         arrowprops=dict(arrowstyle= "fancy",fc="0.6", ec="none",
-                          connectionstyle="angle3,angleA=0,angleB=-90"))
+                # if food_type == "BURGER":
+                #     this_ax.annotate('year: 2021\ntotal count: {: .2f}\nchange rate: {}%'.format(pred_2021, count_change_rate_prior_year),
+                #              xy = (2021, pred_2021) , textcoords='offset points', 
+                #              xytext=(-40,40), # distance from text to points (x,y)
+                #              ha='center',
+                #              bbox=dict(boxstyle="round", alpha=0.1),
+                #              arrowprops=dict(arrowstyle= "fancy",fc="0.6", ec="none",
+                #               connectionstyle="angle3,angleA=0,angleB=-90"))
+                # else:
+                this_ax.annotate('year: 2021\ntotal count: {:.0f}\nchange rate: {}%'.format(pred_2021, count_change_rate_prior_year),
+                        xy = (2021, pred_2021) , textcoords='offset points', 
+                        xytext=(-40,-60), # distance from text to points (x,y)
+                        ha='center',
+                        bbox=dict(boxstyle="round", alpha=0.1),
+                        arrowprops=dict(arrowstyle= "fancy",fc="0.6", ec="none",
+                         connectionstyle="angle3,angleA=0,angleB=-90"))
         elif show_y == "count per person":
             this_ax.set_ylabel("# count per person")
             this_ax.set_ylim(0,7)
@@ -87,23 +87,27 @@ st.title(":chart_with_upwards_trend: Food Production Prediction")
 
 from_year_to_predict = 2021
 
-food_list = ['DONUT', 'BURGER', 'PANCAKE']
-VSP_honorary = {'DONUT': 0.75, 'BURGER': 0.89, 'PANCAKE': 0.92}
-food_list.sort()
+#food_list = ['DONUT', 'PANCAKE']
+VSP_honorary = {'DONUT': 0.75,  'PANCAKE': 0.92}
 
 
 
-upload_file = st.file_uploader('', type="csv", accept_multiple_files=False)
+
+upload_file = st.sidebar.file_uploader('', type="csv", accept_multiple_files=False)
 
 if upload_file:
     df_FTE = pd.read_csv(upload_file, index_col = 'year')
     
-    st.subheader("Raw data exploration: shape {}".format(df_FTE.shape))
+    st.sidebar.subheader("Raw data: {} rows {} columns".format(df_FTE.shape[0], df_FTE.shape[1]))
+    
+    prefixes = [x.split('_')[0] for x in df_FTE.columns]
+    food_list = list(set(prefixes))
+    food_list.sort()
 
-    st.write("---")
+    st.sidebar.write("---")
 
 
-    st.title(":cookie: Burger, Donut, Pancake")
+    st.header(":cookie: {}, {}".format(food_list[0], food_list[1]))
     
     st.sidebar.title(":pencil: Settings")
     increase_rate_input = st.sidebar.number_input("Assume: number of staff yearly increase rate (%) in next 5 years:", -10, 10, 0, 1)
@@ -113,7 +117,7 @@ if upload_file:
     
     features_selected = st.sidebar.selectbox("Factors related to staff number", ["total FTE", "total & re FTE", "three FTE"], 0)
     
-    years_for_training = st.sidebar.number_input("Training years", 2, 7, 7, 1)
+    years_for_training = st.sidebar.number_input("Training years (min 2, max 7)", 2, 7, 7, 1)
     
     plot_radio = st.sidebar.radio("Display total counts or counts per FTE: ", ["total count", "count per person"])
     
@@ -142,10 +146,7 @@ if upload_file:
             one_food_type_original_2021 = [x*(1+increase_rate_input) for x in one_food_type_original_2021]
     
             true_FTE_from_yr_to_predict = one_food_type[from_year_to_predict].copy()
-            if food_type == "BURGER":
-                VSP_2021_number = (one_food_type[from_year_to_predict-1] - true_FTE_from_yr_to_predict - 24.51) * VSP_honorary[food_type]
-            else:
-                VSP_2021_number = (one_food_type[from_year_to_predict-1] - true_FTE_from_yr_to_predict) * VSP_honorary[food_type]
+            VSP_2021_number = (one_food_type[from_year_to_predict-1] - true_FTE_from_yr_to_predict) * VSP_honorary[food_type]
             VSP_2021 = (true_FTE_from_yr_to_predict + VSP_2021_number).tolist()[:3]
             one_food_type[from_year_to_predict].iloc[:3] = VSP_2021
     
@@ -195,7 +196,7 @@ if upload_file:
     ### plot all deps ---------------
     plot_df = all_deps.T
     
-    st.subheader("Factors selected: {}, assume yearly staff number increase: {}, trained by historical {} years".format(features_selected, increase_rate_input, years_for_training))
+    st.subheader("Factors selected: {}, assume yearly staff number increase: {}%, trained by historical {} years".format(features_selected, int(increase_rate_input*100), years_for_training))
     fig = plot_1year_prediction(plot_df, food_list, increase_rate_input, years_for_training, plot_radio)
     st.pyplot(fig)
     
